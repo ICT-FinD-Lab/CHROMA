@@ -11,7 +11,7 @@ from dataset import load_dataset
 from data_utils import eval_acc, eval_rocauc, load_fixed_splits, class_rand_splits
 from eval import *
 from parse import parse_method, parser_add_main_args
-from diagnostics.selection import export_selector_bundle, write_selection_json
+from diagnostics.selection import export_selector_bundle, validate_group_partition, write_selection_json
 
 from torch_geometric.utils import to_dense_adj
 from GraphAttacker import GraphAttacker
@@ -320,17 +320,7 @@ if args.static_correlated_noise:
         graph_coloring_set = torch.load(save_path, map_location='cpu')
         if isinstance(graph_coloring_set, dict):
             graph_coloring_set = graph_coloring_set.get('group')
-        if not isinstance(graph_coloring_set, torch.Tensor):
-            raise TypeError("Static correlation group artifact must contain a tensor")
-        graph_coloring_set = graph_coloring_set.reshape(-1).long()
-        if graph_coloring_set.numel() != n:
-            raise ValueError(
-                f"Static correlation group length mismatch: "
-                f"{graph_coloring_set.numel()} != {n}"
-            )
-        if int(graph_coloring_set.min().item()) < 0:
-            raise ValueError("Static correlation group IDs must be non-negative")
-        graph_coloring_set = graph_coloring_set.to(device)
+        graph_coloring_set = validate_group_partition(graph_coloring_set, n).to(device)
         group_source = save_path
     else:
         graph_coloring_set = make_random_groups(
@@ -378,7 +368,7 @@ elif args.defense_group_noise:
         torch.save(graph_coloring_set, save_path)
         print(f"Saved new coloring to {save_path}")
 
-    graph_coloring_set = graph_coloring_set.to(device)
+    graph_coloring_set = validate_group_partition(graph_coloring_set, n).to(device)
 
 else:
     graph_coloring_set = None

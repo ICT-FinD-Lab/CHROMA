@@ -1,5 +1,6 @@
 """Run training and record the selected-checkpoint metrics."""
 import hashlib
+import io
 import json
 import os
 from pathlib import Path
@@ -28,8 +29,13 @@ def main():
         torch.backends.cuda.matmul.allow_tf32=False
         torch.backends.cudnn.allow_tf32=False
     if plan['group_file']:
-        group=torch.from_numpy(np.load(plan['group_file'],allow_pickle=False)).long()
-        assert group.ndim==1 and group.numel()>0 and int(group.min())==0
+        contents = Path(plan['group_file']).read_bytes()
+        if hashlib.sha256(contents).hexdigest() != plan['group_sha256']:
+            raise ValueError('Group file changed after launch')
+        values = np.load(io.BytesIO(contents), allow_pickle=False)
+        if not isinstance(values, np.ndarray) or values.dtype.kind not in ('i', 'u'):
+            raise ValueError('group IDs must be integers')
+        group = torch.from_numpy(values.astype(values.dtype.newbyteorder('='), copy=False))
         folder=Path('groups')/plan['dataset']; folder.mkdir(parents=True)
         torch.save(group,folder/f'{plan["dataset"]}_tgrasp.pt')
     epochs=[]; attack_values=[]; started=time.time()
@@ -89,7 +95,10 @@ def main():
     assert len(attack_values)==1 and len(epochs)==plan['epochs']
     selected=max(epochs,key=lambda row:row['valid_acc'])
     raw=attack_values[0]
-    result={key:plan[key] for key in ('dataset','backbone','method','sigma','seed','smoke','epochs','attack_backend')}
+    result={key:plan[key] for key in ('dataset','backbone','method','sigma','seed','smoke','epochs','attack_backend',
+                                      'protocol_sha256')}
+    if plan['group_file']:
+        result['group_sha256'] = plan['group_sha256']
     result.update(raw_auc=raw,auc_sep=max(raw,1-raw),accuracy=selected['test_acc'],
                   validation_accuracy=selected['valid_acc'],selected_epoch=selected['epoch'],
                   elapsed_seconds=time.time()-started,

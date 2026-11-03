@@ -9,6 +9,7 @@ import shutil
 import subprocess
 import sys
 import time
+from run_protocol import protocol_digest
 
 ROOT = Path(__file__).resolve().parent
 
@@ -88,6 +89,7 @@ def main():
     # Fixed paper splits are copied only when absent; a different split is an error.
     split=ROOT/f'assets/splits/{a.dataset}_split.npz'
     if split.is_file():
+        plan['fixed_split_sha256'] = sha(split)
         dest=a.data_dir/split.name
         if dest.exists() and sha(dest)!=sha(split):
             p.error(f'Existing split differs from packaged split: {dest}')
@@ -103,6 +105,7 @@ def main():
         ROOT / 'scripts' / 'run_entry.py',
     ]
     plan['code_sha256']={f.relative_to(ROOT).as_posix():sha(f) for f in sorted(code_files)}
+    plan['protocol_sha256'] = protocol_digest(plan)
     launch=work/'launch.json'
     launch.write_text(json.dumps(plan,indent=2)+'\n',encoding='utf-8')
     env=os.environ.copy()

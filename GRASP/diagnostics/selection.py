@@ -62,10 +62,15 @@ def _as_cpu_long_1d(values: torch.Tensor, name: str) -> torch.Tensor:
 
 
 def validate_group_partition(group: torch.Tensor, num_nodes: int) -> torch.Tensor:
+    if not isinstance(group, torch.Tensor) or group.ndim != 1:
+        raise ValueError("group must be a one-dimensional array of integer IDs")
+    if group.dtype not in (torch.int8, torch.int16, torch.int32, torch.int64,
+                           torch.uint8, torch.uint16, torch.uint32, torch.uint64):
+        raise ValueError("group IDs must be integers")
     group = _as_cpu_long_1d(group, "group")
     if group.numel() != num_nodes:
         raise ValueError(
-            f"group has {group.numel()} entries, expected {num_nodes}"
+            f"Expected one group ID per node ({num_nodes}), got {group.numel()}"
         )
     if int(group.min().item()) < 0:
         raise ValueError("group ids must be non-negative")

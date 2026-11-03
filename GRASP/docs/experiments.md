@@ -65,7 +65,9 @@ To reconstruct a partition without replacing a supplied file:
 python prepare_groups.py --dataset cora --output rebuilt_groups
 ```
 
-Use `--groups rebuilt_groups` when training with that partition.
+Use `--groups rebuilt_groups` when training with that partition. The input
+`<dataset>.npy` must be a one-dimensional integer array with one entry per
+node in dataset order. Group IDs must run consecutively from zero.
 
 ## Evaluation
 
@@ -78,9 +80,14 @@ score quantization. Large graphs require additional memory for attack evaluation
 Each run stores raw AUC and `AUC_sep = max(AUC, 1 - AUC)`. Aggregation applies
 this transformation per seed before averaging. Per-seed files use fractions;
 summaries report percentages and population standard deviations. A cell is
-marked complete only when all five seeds, 0–4, are present. When combining
-formal and smoke runs in a CSV, keep the `smoke` column so the summary can
-exclude the smoke runs. The supplied per-seed tables contain formal runs only.
+marked complete when all five seeds, 0–4, share one experiment configuration.
+The launcher records a `protocol_sha256` for the training settings, source
+code, evaluation backend and input partition. Seed numbers and machine-specific
+paths are excluded. Keep this field and the `smoke` column when exporting runs
+to CSV. Earlier runs can be summarized from their original directories with
+`launch.json`. The two archived reference CSVs are recognized by their file
+checksums. A standalone record without configuration information can be read
+individually, but cannot be combined with other seeds.
 
 The entry point runs the main-table correlation attack. Reference control
 measurements are provided separately in `results/controls_per_seed.csv`.

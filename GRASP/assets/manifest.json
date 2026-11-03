@@ -1,0 +1,72 @@
+{
+  "files": [
+    {
+      "path": "assets/groups/amazon-computer.npy",
+      "sha256": "711744173d749e7c8c587c3c7cf38feda149de183e5609c37b3cc651b8adb60c"
+    },
+    {
+      "path": "assets/groups/amazon-photo.npy",
+      "sha256": "f3e1bf387fded12ad276c8952706885dda4762e66939e4ab21a071f3948d5c7b"
+    },
+    {
+      "path": "assets/groups/citeseer.npy",
+      "sha256": "aced0a0eeb4a291de3e23912629137e0bb32767f73045be2260e6e2d0e22c91b"
+    },
+    {
+      "path": "assets/groups/coauthor-cs.npy",
+      "sha256": "22a9e163400a017969831b16ac86b1e1d41528d890e80812e8390789a32b5725"
+    },
+    {
+      "path": "assets/groups/coauthor-physics.npy",
+      "sha256": "0d2685ad0fba720f94b58c57473d03b4843a055071f0570edbe0e435e3b78999"
+    },
+    {
+      "path": "assets/groups/cora.npy",
+      "sha256": "340e403ae2ff30376f223d3be7ab831341fdf3a897a797996f75f6e73a1c2235"
+    },
+    {
+      "path": "assets/groups/ogbn-arxiv_initial.npy",
+      "sha256": "bde7e8216ce973341d6076d4fce5ca601401b21e8a85a7af3167902e62484557"
+    },
+    {
+      "path": "assets/groups/pubmed.npy",
+      "sha256": "2bc45a5137800b8adf15b4c3323eba6da58b847bda894e7dec07e114a3c7b1b6"
+    },
+    {
+      "path": "assets/groups/wikics.npy",
+      "sha256": "00c88ca85ebefebabcc494c632da11c208e52a60abdb04ae13eab62446f53751"
+    },
+    {
+      "path": "assets/splits/amazon-computer_split.npz",
+      "sha256": "dff698aba1dd30b8bd7d1dca65c60b1f8d9027d950e07a23e86dcbf16c539f24"
+    },
+    {
+      "path": "assets/splits/amazon-photo_split.npz",
+      "sha256": "0609f6ab15ddabfe33a34f10d960d09499e634472f72104abb1f3be858127432"
+    },
+    {
+      "path": "assets/splits/coauthor-cs_split.npz",
+      "sha256": "b8c46a38d93b1f9d6b8b8ab944d870e8d44ccdde0639188681e0d38212480ec5"
+    },
+    {
+      "path": "assets/splits/coauthor-physics_split.npz",
+      "sha256": "2034eb90f5ff80eee0e371cc05b20690a16786fb085924b9166c83361fbbcb39"
+    },
+    {
+      "path": "configs/main_table.json",
+      "sha256": "33ba8ae20f1ba8902eda0c4aece4b9c0ee8f913514cfb43f546a2cb2826047b5"
+    },
+    {
+      "path": "configs/tgrasp.json",
+      "sha256": "d32540f0c0a1ed6f0701f7ee18f6c86ce8dcdd15d9f493cda8bf27942692cdb3"
+    },
+    {
+      "path": "results/controls_per_seed.csv",
+      "sha256": "71c0a095ba716181cf46db4ad5891d319a86a4a6b02bc97e04dd77f4d8f343dc"
+    },
+    {
+      "path": "results/main_table_per_seed.csv",
+      "sha256": "9e6ea6adf78ce0fcc1ece0a9c897a1f0156ff7a9af250651c8560ad3d58ac35f"
+    }
+  ]
+}

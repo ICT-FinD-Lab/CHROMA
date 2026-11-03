@@ -1,0 +1,9 @@
+{
+  "tau_E": 0.08,
+  "tau_Q": 0.35,
+  "tau_M": 0.6,
+  "scaffold_cap": 0.7,
+  "audit_B": 128,
+  "lambda_local": 0.5,
+  "knee_risk_weight": 0.5
+}

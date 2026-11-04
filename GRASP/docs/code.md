@@ -6,7 +6,7 @@ All paths below are relative to the `GRASP/` directory.
 | --- | --- |
 | Experiment entry point | `main.py` |
 | Dataset/backbone settings | `configs/main_table.json` |
-| TGRASP settings | `configs/tgrasp.json` |
+| CHROMA grouping parameters | `configs/chroma.json` |
 | GNN and noise injection | `model.py` |
 | Data loading and splits | `dataset.py`, `data_utils.py` |
 | Training and checkpoints | `train.py`, `logger.py` |

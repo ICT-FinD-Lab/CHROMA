@@ -114,7 +114,7 @@ def build_initial_partition(
         max_group_ratio=hard_max_group_ratio,
     )
     return _finalize(
-        "tgrasp",
+        "chroma",
         "coloring.initialization.build_initial_partition",
         edge_index,
         num_nodes,

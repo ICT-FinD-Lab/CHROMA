@@ -4,6 +4,11 @@ import json
 import re
 
 
+def canonical_method(name):
+    """Use the current method names for CLI input and summary rows."""
+    return {'TGRASP': 'CHROMA', 'TGRASP-default': 'CHROMA-default'}.get(name, name)
+
+
 def check_digest(value):
     if not isinstance(value, str) or not re.fullmatch(r'[0-9a-f]{64}', value):
         raise ValueError('Expected a lowercase SHA-256 digest')
@@ -36,8 +41,10 @@ def protocol_digest(launch):
                     fixed_split_sha256=launch.get('fixed_split_sha256'),
                     code_sha256={path: digest for path, digest in launch['code_sha256'].items()
                                  if path not in ('summarize.py', 'run_protocol.py')})
-    if launch['method'] == 'TGRASP':
+    if canonical_method(launch['method']) == 'CHROMA':
         settings['group_sha256'] = check_digest(launch.get('group_sha256'))
-        settings['tgrasp_config_sha256'] = launch.get('tgrasp_config_sha256')
+        # The original field name is part of previously recorded protocol IDs.
+        config_key = launch['method'].lower() + '_config_sha256'
+        settings[config_key] = launch.get(config_key)
     encoded = json.dumps(settings, sort_keys=True, separators=(',', ':'), allow_nan=False)
     return hashlib.sha256(encoded.encode('utf-8')).hexdigest()

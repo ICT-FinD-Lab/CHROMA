@@ -1,6 +1,6 @@
 # Experiment settings
 
-The main comparison evaluates USP, GRASP, and TGRASP with GCN and GAT.
+The main comparison evaluates USP, GRASP, and CHROMA with GCN and GAT.
 All methods use the dataset/backbone configuration in `configs/main_table.json`.
 Run the commands below from the `GRASP/` directory.
 
@@ -31,12 +31,12 @@ produce an error.
 ## Perturbation and grouping
 
 `sigma` is the Gaussian standard deviation. GRASP uses Bernoulli probability
-0.7. USP uses independent noise. TGRASP samples one Gaussian vector per group,
+0.7. USP uses independent noise. CHROMA samples one Gaussian vector per group,
 with independent draws across groups. Noise is applied to the final-layer
 representation during both training and evaluation. At zero noise, all methods
 use the common `CLEAN` setting.
 
-The TGRASP configuration in `configs/tgrasp.json` is shared across datasets,
+The CHROMA configuration in `configs/chroma.json` is shared across datasets,
 backbones, seeds, and noise levels:
 
 | Parameter | Value |

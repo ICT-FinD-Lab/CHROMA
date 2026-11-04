@@ -1,7 +1,7 @@
 # Partitions and splits
 
 `groups/<dataset>.npy` contains an integer group ID for every node, in dataset
-node order. The eight smaller datasets include the final TGRASP partition.
+node order. The eight smaller datasets include the final CHROMA partition.
 `groups/ogbn-arxiv_initial.npy` contains the initial independent-set partition;
 run `prepare_groups.py --dataset ogbn-arxiv` to complete merging and selection.
 

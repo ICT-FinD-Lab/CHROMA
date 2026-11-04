@@ -37,7 +37,7 @@ def main():
             raise ValueError('group IDs must be integers')
         group = torch.from_numpy(values.astype(values.dtype.newbyteorder('='), copy=False))
         folder=Path('groups')/plan['dataset']; folder.mkdir(parents=True)
-        torch.save(group,folder/f'{plan["dataset"]}_tgrasp.pt')
+        torch.save(group,folder/f'{plan["dataset"]}_{plan["method"].lower()}.pt')
     epochs=[]; attack_values=[]; started=time.time()
     original_add=logger_module.Logger.add_result
     def log_epoch(self,run,result):

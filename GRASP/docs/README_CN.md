@@ -1,13 +1,13 @@
-# 基于结构化扰动的图重构防御
+# CHROMA: Coloring-based Graph Reconstruction Defense with Organized Merging of Perturbation
 
 [English](../../README.md)
 
 ## 方法简介
 
-本仓库提供 GRASP 及其拓扑扩展方法 TGRASP 的实现，用于防御基于相似度的图重构攻击。
+本仓库实现了 GRASP 及其扩展方法 CHROMA。两种方法研究的是同一类攻击，即攻击者根据节点嵌入的相似度推断哪些节点之间有边。
 
 GRASP 通过伯努利分配结合独立高斯噪声与相同高斯噪声，干扰节点相似度的相对排序。
-TGRASP 进一步利用图结构决定哪些节点使用相同扰动：先通过独立集着色和约束合并构建节点分组，再在组内加入共享的高斯扰动。
+CHROMA 进一步用图结构决定哪些节点共享扰动。它先对图着色，使同色节点之间没有边，再拆分过大的颜色组。随后逐步合并这些组，同时限制组的大小和落入同一组的边。CHROMA 根据每一步中相邻节点对和非相邻节点对各自的同组比例选出最终划分。同组节点使用同一个高斯噪声向量，不同组独立采样。
 
 [分组代码](../coloring/)生成节点划分，[模型代码](../model.py)将扰动加到节点嵌入上。
 
@@ -20,8 +20,8 @@ TGRASP 进一步利用图结构决定哪些节点使用相同扰动：先通过�
 依赖见 [requirements.txt](../requirements.txt)。以下命令适用于 CUDA 12.4：
 
 ```bash
-git clone https://github.com/ICT-FinD-Lab/GRASP-TGRASP.git
-cd GRASP-TGRASP/GRASP
+git clone https://github.com/ICT-FinD-Lab/CHROMA.git
+cd CHROMA/GRASP
 python -m venv .venv
 source .venv/bin/activate
 python -m pip install torch==2.5.1 --index-url https://download.pytorch.org/whl/cu124
@@ -36,12 +36,18 @@ Windows 下将环境激活命令替换为 `.\.venv\Scripts\Activate.ps1`。
 以下命令均在 `GRASP/` 目录中执行。模型和训练参数按数据集从
 [configs/main_table.json](../configs/main_table.json) 中读取。
 
+可以先用随库提供的 Cora 分组在 CPU 上跑两轮，检查环境能否正常训练和评估。
+
+```bash
+python main.py --dataset cora --method CHROMA --device cpu --smoke
+```
+
 ### Cora
 
 ```bash
 python main.py --dataset cora --backbone gcn --method USP --sigma 1.0 --seed 0 --device 0
 python main.py --dataset cora --backbone gcn --method GRASP --sigma 1.0 --seed 0 --device 0
-python main.py --dataset cora --backbone gcn --method TGRASP --sigma 1.0 --seed 0 --device 0
+python main.py --dataset cora --backbone gcn --method CHROMA --sigma 1.0 --seed 0 --device 0
 ```
 
 同样的命令支持 `citeseer`、`pubmed`、`amazon-computer`、`amazon-photo`、`coauthor-cs`、
@@ -50,19 +56,18 @@ python main.py --dataset cora --backbone gcn --method TGRASP --sigma 1.0 --seed 
 
 ### ogbn-arxiv
 
-先构建 TGRASP 分组，再运行训练：
+训练前先构建 CHROMA 的节点分组。
 
 ```bash
 python prepare_groups.py --dataset ogbn-arxiv
 python main.py --dataset ogbn-arxiv --backbone gcn --method GRASP --sigma 1.0 --seed 0 --device 0
-python main.py --dataset ogbn-arxiv --backbone gcn --method TGRASP --sigma 1.0 --seed 0 --device 0
+python main.py --dataset ogbn-arxiv --backbone gcn --method CHROMA --sigma 1.0 --seed 0 --device 0
 ```
 
 ### 实验设置与结果
 
 主实验使用种子 0–4，噪声标准差为 0.5、1.0、1.5、2.0。
 无噪声基线使用 `--method CLEAN --sigma 0`。
-使用 `--device cpu` 可在处理器上运行；加上 `--smoke` 可进行两轮短程检查。
 详细设置见 [GRASP/docs/experiments.md](../docs/experiments.md)。
 
 运行 `python scripts/make_main_grid.py --output main_grid.csv` 可列出整张主表的实验命令。
@@ -72,5 +77,6 @@ python main.py --dataset ogbn-arxiv --backbone gcn --method TGRASP --sigma 1.0 -
 python summarize.py --input runs --output results/my_summary.csv
 ```
 
-[参考结果](../results/README.md)和[代码说明](../docs/code.md)位于 `GRASP/` 中。
+[参考结果](../results/README.md)保留了原始实验标签 `TGRASP` 和 `TGRASP-default`，汇总时分别显示为 `CHROMA` 和 `CHROMA-default`。
+各模块的实现位置见[代码说明](../docs/code.md)。
 原代码署名见 [NOTICE.md](NOTICE.md)。

@@ -2,11 +2,15 @@
 
 | File | Runs | Contents |
 | --- | ---: | --- |
-| `main_table_per_seed.csv` | 1,170 | USP, GRASP, TGRASP, and zero-noise baselines on nine datasets |
-| `controls_per_seed.csv` | 640 | Default TGRASP configuration and size-matched random grouping on eight datasets |
+| `main_table_per_seed.csv` | 1,170 | USP, GRASP, CHROMA, and zero-noise baselines on nine datasets |
+| `controls_per_seed.csv` | 640 | Default CHROMA configuration and size-matched random grouping on eight datasets |
 
 The main comparison includes 1,040 runs on the eight smaller datasets and
 130 on ogbn-arxiv. Every reported cell contains five seeds.
+
+The archived files use `TGRASP` for CHROMA and `TGRASP-default` for its
+default-configuration control. The summary displays these as `CHROMA` and
+`CHROMA-default`. Earlier commands using `--method TGRASP` also run CHROMA.
 
 | Column | Meaning |
 | --- | --- |

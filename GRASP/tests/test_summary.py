@@ -20,7 +20,7 @@ class SummaryChecks(unittest.TestCase):
             runs = root / 'runs'
             records = []
             for seed in range(5):
-                record = dict(dataset='toy', backbone='gcn', method='TGRASP', sigma=1,
+                record = dict(dataset='toy', backbone='gcn', method='CHROMA', sigma=1,
                               seed=seed, raw_auc=.6, accuracy=.8, smoke=seed != 0)
                 records.append(record)
                 run = runs / str(seed)
@@ -68,7 +68,7 @@ class SummaryChecks(unittest.TestCase):
                 writer=csv.DictWriter(f,fieldnames=['dataset','backbone','method','sigma','seed','raw_auc','accuracy','smoke','protocol_sha256'])
                 writer.writeheader()
                 for seed,auc in enumerate([.2,.8]):
-                    writer.writerow(dict(dataset='toy',backbone='gcn',method='TGRASP',sigma=1,seed=seed,raw_auc=auc,accuracy=.9,
+                    writer.writerow(dict(dataset='toy',backbone='gcn',method='CHROMA',sigma=1,seed=seed,raw_auc=auc,accuracy=.9,
                                          smoke=False,protocol_sha256='a'*64))
             subprocess.run([sys.executable,str(ROOT/'summarize.py'),'--input',str(src),'--output',str(out)],check=True)
             with out.open(newline='') as f: row=next(csv.DictReader(f))
@@ -81,7 +81,7 @@ class SummaryChecks(unittest.TestCase):
             for seed in range(5):
                 run = root / str(seed)
                 run.mkdir()
-                plan = make_plan(Namespace(dataset='cora', backbone='gcn', method='TGRASP', sigma=1.,
+                plan = make_plan(Namespace(dataset='cora', backbone='gcn', method='CHROMA', sigma=1.,
                                            seed=seed, device=str(seed % 2), data_dir=run/'data',
                                            groups=run/'groups', output=run, smoke=False))
                 plan.update(group_sha256='a'*64, code_sha256={'train.py': 'b'*64})
@@ -100,7 +100,7 @@ class SummaryChecks(unittest.TestCase):
             original = json.loads(last.read_text())
             for changes in ({'group_sha256': 'c'*64}, {'epochs': 200}, {'attack_backend': 'sampled'},
                             {'code_sha256': {'train.py':'c'*64}}, {'fixed_split_sha256':'c'*64},
-                            {'tgrasp_config_sha256': 'c'*64},
+                            {'chroma_config_sha256': 'c'*64},
                             {'training_args': original['training_args'] + ['--pre_ln']}):
                 with self.subTest(changes=list(changes)):
                     last.write_text(json.dumps(dict(original, **changes)))
@@ -125,7 +125,7 @@ class SummaryChecks(unittest.TestCase):
                                             ('epochs', 500, 'Mixed experiment settings'),
                                             ('attack_backend', 'sampled', 'Mixed experiment settings')]:
                 with self.subTest(field=field, changed=changed):
-                    rows = [dict(dataset='cora', backbone='gcn', method='TGRASP', sigma=1, seed=i,
+                    rows = [dict(dataset='cora', backbone='gcn', method='CHROMA', sigma=1, seed=i,
                                  raw_auc=.6 if i < 2 else .9, accuracy=.8, smoke=False, protocol_sha256='a'*64,
                                  group_sha256='a'*64, epochs=3000, attack_backend='dense_exact') for i in range(5)]
                     for row in rows[2:]:
@@ -152,10 +152,42 @@ class SummaryChecks(unittest.TestCase):
                 rows = list(csv.DictReader(f))
             self.assertEqual(len(rows), 234)
             self.assertTrue(all(row['complete_five_seed'] == 'True' for row in rows))
+            self.assertEqual({row['method'] for row in rows}, {'CLEAN', 'GRASP', 'CHROMA', 'USP'})
             output.unlink()
             source.write_bytes(contents + b'\n')
             result = subprocess.run(cmd, capture_output=True, text=True)
             self.assertIn('without a verified protocol', result.stderr)
+            self.assertFalse(output.exists())
+
+    def test_archived_launch_keeps_its_digest_and_displays_chroma(self):
+        recorded_id = 'da52b90e45736087c1f480f816c49d1a73d33db93ceb9e90370f841fb2e425f3'
+        launch = dict(dataset='cora', backbone='gcn', method='TGRASP', sigma=1, seed=2, smoke=False,
+                      epochs=3000, attack_backend='dense_exact', profile={'epochs': 3000},
+                      training_args=['--seed', '2', '--defense_group_algorithm', 'tgrasp'],
+                      device='0', code_sha256={'train.py': 'a'*64}, group_sha256='b'*64,
+                      tgrasp_config_sha256='c'*64, protocol_sha256=recorded_id)
+        self.assertEqual(protocol_digest(launch), recorded_id)
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            (root/'launch.json').write_text(json.dumps(launch))
+            row = {k: launch[k] for k in ('dataset','backbone','method','sigma','seed','smoke','protocol_sha256')}
+            (root/'result.json').write_text(json.dumps(dict(row, raw_auc=.6, accuracy=.8)))
+            output = root/'summary.csv'
+            subprocess.run([sys.executable, str(ROOT/'summarize.py'), '--input', str(root),
+                            '--output', str(output)], check=True, capture_output=True)
+            with output.open(newline='') as f:
+                summary, = csv.DictReader(f)
+            self.assertEqual((summary['method'], summary['seeds']), ('CHROMA', '2'))
+
+    def test_old_and_new_method_names_cannot_double_count_a_seed(self):
+        with tempfile.TemporaryDirectory() as temp:
+            source, output = Path(temp)/'runs.csv', Path(temp)/'summary.csv'
+            header = 'dataset,backbone,method,sigma,seed,raw_auc,accuracy,smoke,protocol_sha256\n'
+            row = 'cora,gcn,{},1,2,0.6,0.8,False,' + 'a'*64 + '\n'
+            source.write_text(header + row.format('TGRASP') + row.format('CHROMA'))
+            result = subprocess.run([sys.executable, str(ROOT/'summarize.py'), '--input', str(source),
+                                     '--output', str(output)], capture_output=True, text=True)
+            self.assertIn('Duplicate seed', result.stderr)
             self.assertFalse(output.exists())
 
     def test_exported_five_seeds_keep_the_protocol_and_smoke_fields(self):

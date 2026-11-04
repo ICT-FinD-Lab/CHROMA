@@ -1,4 +1,4 @@
-# Runtime dependencies for GRASP and TGRASP.
+# Runtime dependencies for GRASP and CHROMA.
 torch==2.5.1
 torch-geometric==2.6.1
 torch-scatter==2.1.2

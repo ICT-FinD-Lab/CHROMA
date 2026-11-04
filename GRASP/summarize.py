@@ -7,7 +7,7 @@ import json
 from collections import defaultdict
 from pathlib import Path
 import statistics
-from run_protocol import check_digest, protocol_digest
+from run_protocol import canonical_method, check_digest, protocol_digest
 
 
 def input_records(path):
@@ -70,7 +70,7 @@ def main():
             continue
         if smoke not in ('false', '0'):
             p.error(f'Invalid smoke flag {smoke!r}. Expected true, false, 1, or 0.')
-        key=(row['dataset'],row['backbone'],row['method'],float(row['sigma']))
+        key=(row['dataset'],row['backbone'],canonical_method(row['method']),float(row['sigma']))
         seed=int(row['seed'])
         if (*key,seed) in seen: p.error(f'Duplicate seed: {key}, seed {seed}')
         try:

@@ -1,4 +1,4 @@
-"""Construct TGRASP groups from graph structure, using the frozen configuration."""
+"""Construct CHROMA groups from graph structure, using the frozen configuration."""
 import argparse
 import hashlib
 import json
@@ -28,7 +28,7 @@ def main():
     from coloring.merging import generate_soft_path,select_structural_knee,structural_knee_metadata
     from coloring.metrics import assert_proper_coloring
     torch.set_num_threads(8)
-    cfg=json.loads((ROOT/'configs/tgrasp.json').read_text())
+    cfg=json.loads((ROOT/'configs/chroma.json').read_text())
     started=time.time()
     data=load_dataset(a.data_dir.resolve().as_posix()+'/',a.dataset)
     edge,n=data.graph['edge_index'],data.graph['num_nodes']

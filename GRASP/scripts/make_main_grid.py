@@ -15,7 +15,7 @@ rows=[]
 for dataset in a.datasets:
     for backbone in ('gcn','gat'):
         for seed in range(5):
-            settings=[('CLEAN',0)]+[(m,s) for s in (.5,1,1.5,2) for m in ('USP','GRASP','TGRASP')]
+            settings=[('CLEAN',0)]+[(m,s) for s in (.5,1,1.5,2) for m in ('USP','GRASP','CHROMA')]
             for method,sigma in settings:
                 rows.append(dict(dataset=dataset,backbone=backbone,method=method,sigma=sigma,seed=seed,
                                  epochs=profiles[dataset][backbone]['epochs'],

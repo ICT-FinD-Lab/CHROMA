@@ -58,5 +58,5 @@ def verify_equivalence():
         reference = nx.coloring.greedy_color(graph, strategy='independent_set')
         with contextlib.redirect_stdout(io.StringIO()):
             actual = nx.coloring.greedy_color(graph, strategy=cached_independent_strategy)
-        assert reference == actual, 'Canonical coloring differs; do not run TGRASP'
+        assert reference == actual, 'CHROMA requires the canonical independent-set coloring'
     return len(graphs)

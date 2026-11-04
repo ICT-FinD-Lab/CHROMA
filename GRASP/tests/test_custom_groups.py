@@ -38,14 +38,16 @@ class CustomGroupChecks(unittest.TestCase):
                          train_mask=nodes < 12, val_mask=(nodes >= 12) & (nodes < 16),
                          test_mask=nodes >= 16)
             InMemoryDataset.save([graph], str(cache/'processed'/'data.pt'))
-            for case, values, error in (
-                    ('short', [0], 'Expected one group ID per node (20), got 1'),
-                    ('fractional', np.resize([-.25, 1.75], 20), 'group IDs must be integers'),
-                    ('valid', np.array(nodes % 3, dtype='>i4'), None)):
+            valid_groups = np.array(nodes % 3, dtype='>i4')
+            valid_results = []
+            for case, method, values, error in (
+                    ('short', 'CHROMA', [0], 'Expected one group ID per node (20), got 1'),
+                    ('fractional', 'CHROMA', np.resize([-.25, 1.75], 20), 'group IDs must be integers'),
+                    ('valid', 'CHROMA', valid_groups, None), ('legacy', 'TGRASP', valid_groups, None)):
                 with self.subTest(case=case):
                     output = root/case
                     np.save(root/'cora.npy', values, allow_pickle=False)
-                    run = subprocess.run([sys.executable, str(ROOT/'main.py'), '--method', 'TGRASP',
+                    run = subprocess.run([sys.executable, str(ROOT/'main.py'), '--method', method,
                                           '--device', 'cpu', '--smoke', '--data-dir', str(root/'data'),
                                           '--groups', str(root), '--output', str(output)],
                                          capture_output=True, text=True)
@@ -59,6 +61,9 @@ class CustomGroupChecks(unittest.TestCase):
                         self.assertEqual(run.returncode, 0, run.stderr)
                         result = json.loads(result_file.read_text())
                         launch = json.loads(launch_file.read_text())
+                        self.assertEqual(result['method'], 'CHROMA')
                         self.assertEqual(result['protocol_sha256'], launch['protocol_sha256'])
                         self.assertEqual(result['group_sha256'], launch['group_sha256'])
                         self.assertTrue(0 <= result['raw_auc'] <= 1)
+                        valid_results.append((result['protocol_sha256'], result['raw_auc'], result['accuracy']))
+            self.assertEqual(valid_results[0], valid_results[1])

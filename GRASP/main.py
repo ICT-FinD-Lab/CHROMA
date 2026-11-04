@@ -1,4 +1,4 @@
-"""Train and evaluate USP, GRASP, or TGRASP with the main experiment settings."""
+"""Train and evaluate USP, GRASP, or CHROMA with the main experiment settings."""
 import argparse
 import hashlib
 import json
@@ -9,7 +9,7 @@ import shutil
 import subprocess
 import sys
 import time
-from run_protocol import protocol_digest
+from run_protocol import canonical_method, protocol_digest
 
 ROOT = Path(__file__).resolve().parent
 
@@ -30,7 +30,7 @@ def make_plan(args):
     else:
         if args.method == 'CLEAN':
             raise ValueError('CLEAN requires --sigma 0')
-        method = args.method
+        method = canonical_method(args.method)
     run_id = f'{args.dataset}_{args.backbone}_{method}_sigma{args.sigma:g}_seed{args.seed}'
     if args.smoke:
         run_id += '_smoke'
@@ -49,9 +49,9 @@ def make_plan(args):
             if value: command.append('--'+key)
         else: command += ['--'+key,str(value)]
     group = None
-    if method=='TGRASP':
+    if method=='CHROMA':
         group = args.groups.resolve()/f'{args.dataset}.npy'
-        command += ['--defense_group_noise','--defense_group_algorithm','tgrasp',
+        command += ['--defense_group_noise','--defense_group_algorithm','chroma',
                     '--group_dir',(work/'groups').as_posix()]
     return dict(dataset=args.dataset,backbone=args.backbone,method=method,sigma=args.sigma,seed=args.seed,
                 smoke=args.smoke,device=args.device,work_dir=str(work),group_file=str(group) if group else None,
@@ -59,7 +59,7 @@ def make_plan(args):
                 attack_backend='blockwise_exact' if args.dataset=='ogbn-arxiv' else 'dense_exact',
                 training_args=command,profile=profile,
                 profile_file_sha256=sha(ROOT/'configs/main_table.json'),
-                tgrasp_config_sha256=sha(ROOT/'configs/tgrasp.json'))
+                chroma_config_sha256=sha(ROOT/'configs/chroma.json'))
 
 
 def main():
@@ -67,7 +67,7 @@ def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--dataset', choices=sorted(profiles), default='cora')
     p.add_argument('--backbone',choices=['gcn','gat'],default='gcn')
-    p.add_argument('--method',choices=['USP','GRASP','TGRASP','CLEAN'],default='TGRASP')
+    p.add_argument('--method',type=canonical_method,choices=['USP','GRASP','CHROMA','CLEAN'],default='CHROMA')
     p.add_argument('--sigma',type=float,default=1.)
     p.add_argument('--seed',type=int,default=0)
     p.add_argument('--device',default='0',help='CUDA device index, or cpu')

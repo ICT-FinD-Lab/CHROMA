@@ -1,1 +1,1 @@
-"""Topology-based partition construction used by TGRASP."""
+"""Graph coloring and constrained group merging for CHROMA."""

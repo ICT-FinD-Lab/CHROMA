@@ -1,6 +1,6 @@
 # CHROMA: Coloring-based Graph Reconstruction Defense with Organized Merging of Perturbation
 
-[English](../../README.md)
+[English](../README.md)
 
 ## 方法简介
 
@@ -21,7 +21,7 @@ CHROMA 进一步用图结构决定哪些节点共享扰动。它先对图着色�
 
 ```bash
 git clone https://github.com/ICT-FinD-Lab/CHROMA.git
-cd CHROMA/GRASP
+cd CHROMA
 python -m venv .venv
 source .venv/bin/activate
 python -m pip install torch==2.5.1 --index-url https://download.pytorch.org/whl/cu124
@@ -33,7 +33,7 @@ Windows 下将环境激活命令替换为 `.\.venv\Scripts\Activate.ps1`。
 
 ## 运行方法
 
-以下命令均在 `GRASP/` 目录中执行。模型和训练参数按数据集从
+以下命令均在仓库根目录中执行。模型和训练参数按数据集从
 [configs/main_table.json](../configs/main_table.json) 中读取。
 
 可以先用随库提供的 Cora 分组在 CPU 上跑两轮，检查环境能否正常训练和评估。
@@ -68,7 +68,7 @@ python main.py --dataset ogbn-arxiv --backbone gcn --method CHROMA --sigma 1.0 -
 
 主实验使用种子 0–4，噪声标准差为 0.5、1.0、1.5、2.0。
 无噪声基线使用 `--method CLEAN --sigma 0`。
-详细设置见 [GRASP/docs/experiments.md](../docs/experiments.md)。
+详细设置见[实验说明](experiments.md)。
 
 运行 `python scripts/make_main_grid.py --output main_grid.csv` 可列出整张主表的实验命令。
 每次训练的日志、模型和指标都保存在 `runs/`，用下面的命令汇总已完成的运行。
@@ -78,5 +78,5 @@ python summarize.py --input runs --output results/my_summary.csv
 ```
 
 [参考结果](../results/README.md)保留了原始实验标签 `TGRASP` 和 `TGRASP-default`，汇总时分别显示为 `CHROMA` 和 `CHROMA-default`。
-各模块的实现位置见[代码说明](../docs/code.md)。
+各模块的实现位置见[代码说明](code.md)。
 原代码署名见 [NOTICE.md](NOTICE.md)。

@@ -1,22 +1,41 @@
+# Environments
 .venv/
 venv/
+env/
+
+# Python cache and bytecode
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
 .pytest_cache/
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Operating system files
 .DS_Store
 Thumbs.db
+
+# Secrets and keys
 .env
 .env.*
 *.pem
 *.key
+
+# Runtime data, logs, and checkpoints
 data/
 runs/
 rebuilt_groups/
 models/
 results_csv/
 *.log
-**/results/*/*.csv
-**/results/my_*.csv
-**/results/reference_summary.csv
+
+# Generated results and summaries
+results/*/*.csv
+results/my_*.csv
+results/reference_summary.csv
 main_grid.csv
 *.zip

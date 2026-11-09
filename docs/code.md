@@ -1,6 +1,6 @@
 # Code structure
 
-All paths below are relative to the `GRASP/` directory.
+All paths below are relative to the repository root directory.
 
 | Component | Implementation |
 | --- | --- |
@@ -19,7 +19,7 @@ All paths below are relative to the `GRASP/` directory.
 | Validation pairs, embedding diagnostics, and checkpoint export | `diagnostics/` |
 | Result aggregation | `summarize.py` |
 
-Start experiments with `python main.py` from `GRASP/`. It loads the configuration,
+Start experiments with `python main.py` from the repository root. It loads the configuration,
 prepares the partition path and output directory, and dispatches the training
 loop in `train.py`.
 

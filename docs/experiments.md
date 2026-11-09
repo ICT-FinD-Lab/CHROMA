@@ -2,7 +2,7 @@
 
 The main comparison evaluates USP, GRASP, and CHROMA with GCN and GAT.
 All methods use the dataset/backbone configuration in `configs/main_table.json`.
-Run the commands below from the `GRASP/` directory.
+Run the commands below from the repository root directory.
 
 ## Data and training
 

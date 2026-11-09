@@ -17,10 +17,9 @@ Run the commands below from the repository root directory.
 | WikiCS | 2,000 | First provided split; validation and stopping masks combined |
 | ogbn-arxiv | 5,000 | Per-seed random 60/20/20 |
 
-The ogbn-arxiv experiment uses the random split above rather than the official
-OGB chronological split. Amazon and Coauthor features are normalized; Planetoid
-features are used without that transform. Residual connections and model
-normalization are configured separately for each dataset and backbone.
+We normalize Amazon and Coauthor features and use the original Planetoid
+features. Residual connections and model normalization are configured
+separately for each dataset and backbone.
 
 The first checkpoint attaining the highest validation accuracy is selected.
 Classification accuracy is measured on the corresponding test split. Each run
@@ -53,8 +52,8 @@ Independent-set coloring supplies the initial groups. Oversized groups are
 split deterministically. Constrained merging produces a sequence of partitions,
 and the structural knee selects a partition from that sequence. The effective
 group-size cap is `min(0.95, max(tau_M, initial_max_group_ratio + 0.02))`.
-Partition construction uses graph structure and is independent of the training
-seed, noise level, and attack results.
+CHROMA builds the partition from the graph topology once and reuses it
+across backbones, training seeds, and noise levels.
 
 The eight smaller datasets' final partitions are included. For ogbn-arxiv,
 `prepare_groups.py` starts from the included initial partition and completes
@@ -81,13 +80,10 @@ Each run stores raw AUC and `AUC_sep = max(AUC, 1 - AUC)`. Aggregation applies
 this transformation per seed before averaging. Per-seed files use fractions;
 summaries report percentages and population standard deviations. A cell is
 marked complete when all five seeds, 0–4, share one experiment configuration.
-The launcher records a `protocol_sha256` for the training settings, source
-code, evaluation backend and input partition. Seed numbers and machine-specific
-paths are excluded. Keep this field and the `smoke` column when exporting runs
-to CSV. Earlier runs can be summarized from their original directories with
-`launch.json`. The two archived reference CSVs are recognized by their file
-checksums. A standalone record without configuration information can be read
-individually, but cannot be combined with other seeds.
+
+Each run stores its configuration in `launch.json` and per-epoch metrics in
+`epochs.jsonl`. Use `summarize.py` to aggregate completed runs across seeds.
+Keep `protocol_sha256` and `smoke` when exporting runs to CSV for aggregation.
 
 The entry point runs the main-table correlation attack. Reference control
 measurements are provided separately in `results/controls_per_seed.csv`.

@@ -2,15 +2,11 @@
 
 | File | Runs | Contents |
 | --- | ---: | --- |
-| `main_table_per_seed.csv` | 1,170 | USP, GRASP, CHROMA, and zero-noise baselines on nine datasets |
-| `controls_per_seed.csv` | 640 | Default CHROMA configuration and size-matched random grouping on eight datasets |
+| [`main_table_per_seed.csv`](main_table_per_seed.csv) | 1,170 | USP, GRASP, CHROMA, and zero-noise baselines on nine datasets |
+| [`controls_per_seed.csv`](controls_per_seed.csv) | 640 | Default CHROMA configuration and size-matched random grouping on eight datasets |
 
 The main comparison includes 1,040 runs on the eight smaller datasets and
 130 on ogbn-arxiv. Every reported cell contains five seeds.
-
-The archived files use `TGRASP` for CHROMA and `TGRASP-default` for its
-default-configuration control. The summary displays these as `CHROMA` and
-`CHROMA-default`. Earlier commands using `--method TGRASP` also run CHROMA.
 
 | Column | Meaning |
 | --- | --- |
@@ -22,10 +18,11 @@ default-configuration control. The summary displays these as `CHROMA` and
 | `accuracy` | Test classification accuracy at the selected checkpoint |
 | `campaign`, `source_record` | Source experiment and record identifier |
 
-Metrics in these files are fractions in [0, 1]. To produce a percentage summary:
+Metrics in these files are fractions in [0, 1]. To summarize the main comparison and controls as percentages:
 
 ```bash
 python summarize.py --input results/main_table_per_seed.csv --output results/reference_summary.csv
+python summarize.py --input results/controls_per_seed.csv --output results/my_controls_summary.csv
 ```
 
 The summary applies the AUC orientation correction per seed before averaging.

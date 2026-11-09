@@ -1,7 +1,7 @@
 # Attribution
 
-GRASP is introduced in *Differentially Private Graph Reconstruction Defense
-with Structured Perturbation*, [KDD 2025](https://doi.org/10.1145/3711896.3736992).
+GRASP is introduced in *GRASP: Differentially Private Graph Reconstruction
+Defense with Structured Perturbation*, [KDD 2025](https://doi.org/10.1145/3711896.3736992).
 The original implementation is available at
 [ZhiyuZone/GRASP](https://github.com/ZhiyuZone/GRASP).
 

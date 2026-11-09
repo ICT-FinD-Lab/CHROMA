@@ -14,31 +14,53 @@ CHROMA 进一步用图结构决定哪些节点共享扰动。它先对图着色�
 原 GRASP：[论文](https://doi.org/10.1145/3711896.3736992) ·
 [代码](https://github.com/ZhiyuZone/GRASP)
 
-## 环境安装
+## 仓库结构
 
-使用 Python 3.11、PyTorch 2.5.1 和 PyTorch Geometric 2.6.1。
-依赖见 [requirements.txt](../requirements.txt)。以下命令适用于 CUDA 12.4：
+| 路径 | 用途 |
+| --- | --- |
+| [`main.py`](../main.py)、[`train.py`](../train.py) | 实验入口与训练 |
+| [`coloring/`](../coloring/)、[`model.py`](../model.py) | 构建 CHROMA 分组并对节点嵌入加噪 |
+| [`configs/`](../configs/)、[`assets/`](../assets/) | 实验配置、预计算分组和数据划分 |
+| [`scripts/`](../scripts/)、[`tests/`](../tests/) | 实验命令、输入校验和测试 |
+| [`results/`](../results/)、[`summarize.py`](../summarize.py) | 逐种子参考结果与汇总工具 |
+
+各模块及运行产物见[代码说明](code.md)。
+
+## 复现实验
+
+### 安装依赖
+
+使用 Python 3.11。克隆后在仓库根目录执行以下命令。
 
 ```bash
 git clone https://github.com/ICT-FinD-Lab/CHROMA.git
 cd CHROMA
 python -m venv .venv
 source .venv/bin/activate
-python -m pip install torch==2.5.1 --index-url https://download.pytorch.org/whl/cu124
-python -m pip install -r requirements.txt -f https://data.pyg.org/whl/torch-2.5.1+cu124.html
 ```
 
-Windows 下将环境激活命令替换为 `.\.venv\Scripts\Activate.ps1`。
-使用其他 CUDA 版本时，选择相应的 PyTorch 和 PyG 安装包。
+Windows PowerShell 下使用 `.\.venv\Scripts\Activate.ps1` 激活环境。
 
-## 运行方法
-
-以下命令均在仓库根目录中执行。模型和训练参数按数据集从
-[configs/main_table.json](../configs/main_table.json) 中读取。
-
-可以先用随库提供的 Cora 分组在 CPU 上跑两轮，检查环境能否正常训练和评估。
+在 CPU 上试运行或跑测试时，安装以下依赖：
 
 ```bash
+python -m pip install torch==2.5.1 --index-url https://download.pytorch.org/whl/cpu
+python -m pip install --only-binary=torch-scatter,torch-sparse -r requirements.txt -f https://data.pyg.org/whl/torch-2.5.1+cpu.html
+```
+
+在 CUDA 12.4 上跑正式实验时，在新环境中安装对应的依赖：
+
+```bash
+python -m pip install torch==2.5.1 --index-url https://download.pytorch.org/whl/cu124
+python -m pip install --only-binary=torch-scatter,torch-sparse -r requirements.txt -f https://data.pyg.org/whl/torch-2.5.1+cu124.html
+```
+
+### 快速检查
+
+校验随库文件，并用 Cora 在 CPU 上训练和评估两轮：
+
+```bash
+python scripts/verify_data.py
 python main.py --dataset cora --method CHROMA --device cpu --smoke
 ```
 
@@ -64,19 +86,22 @@ python main.py --dataset ogbn-arxiv --backbone gcn --method GRASP --sigma 1.0 --
 python main.py --dataset ogbn-arxiv --backbone gcn --method CHROMA --sigma 1.0 --seed 0 --device 0
 ```
 
-### 实验设置与结果
+### 主表复现
 
 主实验使用种子 0–4，噪声标准差为 0.5、1.0、1.5、2.0。
 无噪声基线使用 `--method CLEAN --sigma 0`。
 详细设置见[实验说明](experiments.md)。
 
-运行 `python scripts/make_main_grid.py --output main_grid.csv` 可列出整张主表的实验命令。
-每次训练的日志、模型和指标都保存在 `runs/`，用下面的命令汇总已完成的运行。
+下面两条命令分别列出主表的训练命令、从随库的逐种子结果生成汇总表：
 
 ```bash
-python summarize.py --input runs --output results/my_summary.csv
+python scripts/make_main_grid.py --output main_grid.csv
+python summarize.py --input results/main_table_per_seed.csv --output results/reference_summary.csv
 ```
 
-[参考结果](../results/README.md)保留了原始实验标签 `TGRASP` 和 `TGRASP-default`，汇总时分别显示为 `CHROMA` 和 `CHROMA-default`。
-各模块的实现位置见[代码说明](code.md)。
-原代码署名见 [NOTICE.md](NOTICE.md)。
+每次训练的日志、模型和指标都保存在 `runs/`。汇总自行完成的实验时，使用
+`--input runs --output results/my_summary.csv`。主实验和对照实验的记录见[参考结果](../results/README.md)。
+
+## 引用
+
+原 GRASP 论文的 BibTeX 见[英文说明](../README.md#citation)。原代码和第三方来源见 [NOTICE.md](NOTICE.md)。

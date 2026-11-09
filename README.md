@@ -1,15 +1,7 @@
 # CHROMA: Coloring-based Graph Reconstruction Defense with Organized Merging of Perturbation
 
-<p align="left">
-  <img src="https://img.shields.io/badge/Python-3.11-blue.svg" alt="Python 3.11">
-  <img src="https://img.shields.io/badge/PyTorch-2.5.1-red.svg" alt="PyTorch 2.5.1">
-  <img src="https://img.shields.io/badge/PyG-2.6.1-orange.svg" alt="PyG 2.6.1">
-  <img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License MIT">
-</p>
-
 [中文说明](docs/README_CN.md)
 
-## Overview
 
 This repository implements **GRASP** and its extension, **CHROMA**, for defending
 against attacks that reconstruct graph edges from the similarity of node embeddings.
@@ -23,62 +15,60 @@ partition by comparing how often adjacent and nonadjacent pairs end up in the
 same group. Nodes in the same group receive the same Gaussian noise vector.
 Different groups draw their noise independently.
 
-- Grouping and partition logic: [coloring/](coloring/)
-- Perturbation and model injection: [model.py](model.py)
-- Architecture details: [docs/code.md](docs/code.md)
-- Original GRASP: [Paper](https://doi.org/10.1145/3711896.3736992) · [Code](https://github.com/ZhiyuZone/GRASP)
+The original GRASP implementation accompanies the [KDD 2025 paper](https://doi.org/10.1145/3711896.3736992). See [the original repository](https://github.com/ZhiyuZone/GRASP) and [source attribution](docs/NOTICE.md).
 
-## Repository Structure
+## Repository structure
 
-```text
-CHROMA/
-├── assets/                  # Precomputed group partitions, split indices, and checksum manifest
-├── coloring/                # Core CHROMA implementation: initialization, merging, and metrics
-├── configs/                 # Hyperparameters (chroma.json) and experiment profiles (main_table.json)
-├── diagnostics/             # Embedding diagnostics, checkpoint trackers, and partition validation
-├── docs/                    # Detailed technical docs (code.md, experiments.md, README_CN.md, NOTICE.md)
-├── results/                 # Per-seed benchmark metrics and reference results
-├── scripts/                 # Utility scripts (verify_data.py, make_main_grid.py, run_entry.py)
-├── tests/                   # Automated unit and consistency tests
-├── main.py                  # Main experiment entry point
-├── train.py                 # Training loop and evaluation execution
-├── model.py                 # GNN model definitions and noise injection
-├── requirements.txt         # Runtime Python dependencies
-└── LICENSE                  # MIT License
-```
+| Path | Purpose |
+| --- | --- |
+| [`main.py`](main.py), [`train.py`](train.py) | Experiment launcher and training loop |
+| [`coloring/`](coloring/), [`model.py`](model.py) | Build CHROMA groups and apply noise to node embeddings |
+| [`configs/`](configs/), [`assets/`](assets/) | Experiment settings, partitions, and data splits |
+| [`scripts/`](scripts/), [`tests/`](tests/) | Experiment commands, input verification, and tests |
+| [`results/`](results/), [`summarize.py`](summarize.py) | Per-seed reference results and summary tool |
 
-## Installation
+See [the code guide](docs/code.md) for module details and the files produced by each run.
 
-The code uses **Python 3.11**, **PyTorch 2.5.1**, and **PyTorch Geometric 2.6.1**.
-All dependencies are listed in [requirements.txt](requirements.txt).
-The following commands install the CUDA 12.4 environment:
+## Reproduce the experiments
+
+### Install dependencies
+
+Use Python 3.11. Clone the repository and run all commands from its root.
 
 ```bash
 git clone https://github.com/ICT-FinD-Lab/CHROMA.git
 cd CHROMA
 python -m venv .venv
 source .venv/bin/activate
-python -m pip install torch==2.5.1 --index-url https://download.pytorch.org/whl/cu124
-python -m pip install -r requirements.txt -f https://data.pyg.org/whl/torch-2.5.1+cu124.html
 ```
 
-On Windows, replace the activation command with `.\.venv\Scripts\Activate.ps1`.
-For other CUDA versions, use the corresponding PyTorch and PyG wheels.
+On Windows PowerShell, use `.\.venv\Scripts\Activate.ps1`.
 
-## Running the Code
-
-Run all commands from the repository root directory. Dataset-specific model
-and training parameters are loaded from [configs/main_table.json](configs/main_table.json).
-
-### Smoke Test
-
-For a two-epoch CPU check with the supplied Cora partition:
+For a CPU environment, including the quick check and tests:
 
 ```bash
+python -m pip install torch==2.5.1 --index-url https://download.pytorch.org/whl/cpu
+python -m pip install --only-binary=torch-scatter,torch-sparse -r requirements.txt -f https://data.pyg.org/whl/torch-2.5.1+cpu.html
+```
+
+For GPU experiments with CUDA 12.4, use these commands in a fresh environment:
+
+```bash
+python -m pip install torch==2.5.1 --index-url https://download.pytorch.org/whl/cu124
+python -m pip install --only-binary=torch-scatter,torch-sparse -r requirements.txt -f https://data.pyg.org/whl/torch-2.5.1+cu124.html
+```
+
+### Quick check
+
+Verify the supplied inputs and run two epochs of training and evaluation on Cora:
+
+```bash
+python scripts/verify_data.py
 python main.py --dataset cora --method CHROMA --device cpu --smoke
 ```
 
 ### Cora
+
 
 ```bash
 python main.py --dataset cora --backbone gcn --method USP --sigma 1.0 --seed 0 --device 0
@@ -100,63 +90,32 @@ python main.py --dataset ogbn-arxiv --backbone gcn --method GRASP --sigma 1.0 --
 python main.py --dataset ogbn-arxiv --backbone gcn --method CHROMA --sigma 1.0 --seed 0 --device 0
 ```
 
-### Experiment Settings and Results
+### Main table
 
 The main comparison uses seeds 0–4 and noise standard deviations 0.5, 1.0, 1.5,
-and 2.0. For the zero-noise baseline, use `--method CLEAN --sigma 0`.
-Detailed settings are in [docs/experiments.md](docs/experiments.md).
-
-To list all main-table commands, run:
+and 2.0. Use `--method CLEAN --sigma 0` for the zero-noise baseline. See
+[experiment settings](docs/experiments.md) for the data splits and evaluation protocol.
 
 ```bash
+# List the training commands for the full comparison.
 python scripts/make_main_grid.py --output main_grid.csv
+# Summarize the supplied per-seed results.
+python summarize.py --input results/main_table_per_seed.csv --output results/reference_summary.csv
 ```
 
-Each training command saves its log, checkpoint, and measurements to `runs/`. To summarize completed runs:
-
-```bash
-python summarize.py --input runs --output results/my_summary.csv
-```
-
-Reference benchmark records are detailed in [results/README.md](results/README.md).
-
-### Verification & Tests
-
-To verify experiment assets, manifest checksums, and run consistency tests:
-
-```bash
-python scripts/verify_data.py
-python -m unittest discover -s tests -v
-```
-
-## Contributors & Maintainers
-
-This work is maintained by the FinD Lab, [Institute of Computing Technology, Chinese Academy of Sciences (ICT, CAS)](http://iip.ict.ac.cn/).
-
-- **Tong Deng** ([@dt-xde](https://github.com/dt-xde))
-
-Source attribution and third-party dependencies are acknowledged in [docs/NOTICE.md](docs/NOTICE.md).
+Each training run writes its log, checkpoint, and metrics to `runs/`. To
+summarize your own completed runs, use `--input runs --output results/my_summary.csv`.
+See [reference results](results/README.md) for the main comparison and controls.
 
 ## Citation
 
 ```bibtex
-@inproceedings{grasp2025,
-  title     = {Differentially Private Graph Reconstruction Defense with Structured Perturbation},
-  author    = {Zhiyu Li and others},
-  booktitle = {Proceedings of the 31st ACM SIGKDD Conference on Knowledge Discovery and Data Mining},
+@inproceedings{guo2025grasp,
+  author    = {Guo, Zhiyu and Liu, Yang and Ao, Xiang and He, Qing},
+  title     = {{GRASP}: Differentially Private Graph Reconstruction Defense with Structured Perturbation},
+  booktitle = {Proceedings of the 31st ACM SIGKDD Conference on Knowledge Discovery and Data Mining V.2},
   year      = {2025},
+  pages     = {767--777},
   doi       = {10.1145/3711896.3736992}
 }
 ```
-
-```bibtex
-@article{chroma2026,
-  title   = {CHROMA: Coloring-based Graph Reconstruction Defense with Organized Merging of Perturbation},
-  author  = {Tong Deng and others},
-  year    = {2026}
-}
-```
-
-## License
-
-This project is licensed under the [MIT License](LICENSE).

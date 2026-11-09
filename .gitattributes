@@ -1,16 +1,19 @@
-# Preserve exact bytes and line endings across platforms for checksum verification
-assets/groups/*.npy binary
-assets/splits/*.npz binary
-assets/manifest.json text eol=lf
-configs/*.json text eol=lf
-results/*.csv text eol=lf
-results/*.md text eol=lf
-
-# Source code and documentation
+# Keep source and documentation line endings consistent across platforms.
 *.py text eol=lf
 *.md text eol=lf
 *.yml text eol=lf
 *.json text eol=lf
+.gitattributes text eol=lf
 .gitignore text eol=lf
 requirements.txt text eol=lf
 LICENSE text eol=lf
+
+assets/groups/*.npy binary
+assets/splits/*.npz binary
+
+# The verifier checks these files byte for byte, including line endings.
+assets/manifest.json -text !eol
+configs/chroma.json -text !eol
+configs/main_table.json -text !eol
+results/controls_per_seed.csv -text !eol
+results/main_table_per_seed.csv -text !eol

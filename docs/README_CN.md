@@ -11,9 +11,6 @@ CHROMA 进一步用图结构决定哪些节点共享扰动。它先对图着色�
 
 [分组代码](../coloring/)生成节点划分，[模型代码](../model.py)将扰动加到节点嵌入上。
 
-原 GRASP：[论文](https://doi.org/10.1145/3711896.3736992) ·
-[代码](https://github.com/ZhiyuZone/GRASP)
-
 ## 仓库结构
 
 | 路径 | 用途 |
@@ -104,4 +101,12 @@ python summarize.py --input results/main_table_per_seed.csv --output results/ref
 
 ## 引用
 
-原 GRASP 论文的 BibTeX 见[英文说明](../README.md#citation)。原代码和第三方来源见 [NOTICE.md](NOTICE.md)。
+原 GRASP 论文的 BibTeX 见[英文说明](../README.md#citation)。
+
+## 致谢
+
+CHROMA 基于 [GRASP（Guo 等，KDD 2025）](https://doi.org/10.1145/3711896.3736992)
+及其[原始实现](https://github.com/ZhiyuZone/GRASP)。本项目使用
+[PyTorch](https://pytorch.org/)、[PyTorch Geometric](https://pyg.org/)、
+[OGB](https://ogb.stanford.edu/) 和 [NetworkX](https://networkx.org/)。
+训练日志模块改编自 [OGB 仓库](https://github.com/snap-stanford/ogb)。

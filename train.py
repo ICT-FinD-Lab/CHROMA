@@ -688,9 +688,7 @@ if args.selector_trial_output:
         'defence_p': float(args.defence_p),
         'noise_node_fraction': float(args.noise_node_fraction),
         'noise_node_energy_match': bool(args.noise_node_energy_match),
-        'warning': (
-            'Validation-only trial. Test accuracy was not measured.'
-        ),
+        'stage': 'validation_only',
     }
     write_selection_json(args.selector_trial_output, trial_payload)
     print(f'Validation trial: {args.selector_trial_output}')

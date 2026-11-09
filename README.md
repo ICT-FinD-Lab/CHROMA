@@ -15,8 +15,6 @@ partition by comparing how often adjacent and nonadjacent pairs end up in the
 same group. Nodes in the same group receive the same Gaussian noise vector.
 Different groups draw their noise independently.
 
-The original GRASP implementation accompanies the [KDD 2025 paper](https://doi.org/10.1145/3711896.3736992). See [the original repository](https://github.com/ZhiyuZone/GRASP) and [source attribution](docs/NOTICE.md).
-
 ## Repository structure
 
 | Path | Purpose |
@@ -119,3 +117,11 @@ See [reference results](results/README.md) for the main comparison and controls.
   doi       = {10.1145/3711896.3736992}
 }
 ```
+
+## Acknowledgements
+
+CHROMA builds on [GRASP (Guo et al., KDD 2025)](https://doi.org/10.1145/3711896.3736992)
+and its [original implementation](https://github.com/ZhiyuZone/GRASP). The code
+uses [PyTorch](https://pytorch.org/), [PyTorch Geometric](https://pyg.org/),
+[OGB](https://ogb.stanford.edu/), and [NetworkX](https://networkx.org/).
+The training logger is adapted from the [OGB repository](https://github.com/snap-stanford/ogb).

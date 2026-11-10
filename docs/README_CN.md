@@ -1,29 +1,18 @@
-# CHROMA: Coloring-based Graph Reconstruction Defense with Organized Merging of Perturbation
+# CHROMA
 
-[English](../README.md)
+*基于图着色与受限合并的图重构防御*
 
-## 方法简介
+[English](../README.md) · [快速开始](#快速开始) · [实验设置](experiments.md) · [参考结果](../results/README.md)
 
-本仓库实现了 GRASP 及其扩展方法 CHROMA。两种方法研究的是同一类攻击，即攻击者根据节点嵌入的相似度推断哪些节点之间有边。
+CHROMA 根据图结构决定哪些节点共享高斯扰动，用于防御通过节点嵌入相似度推断图中边的攻击。仓库也提供原 GRASP 和独立噪声基线。
 
-GRASP 通过伯努利分配结合独立高斯噪声与相同高斯噪声，干扰节点相似度的相对排序。
-CHROMA 进一步用图结构决定哪些节点共享扰动。它先对图着色，使同色节点之间没有边，再拆分过大的颜色组。随后逐步合并这些组，同时限制组的大小和落入同一组的边。CHROMA 根据每一步中相邻节点对和非相邻节点对各自的同组比例选出最终划分。同组节点使用同一个高斯噪声向量，不同组独立采样。
+## 方法概览
 
-[分组代码](../coloring/)生成节点划分，[模型代码](../model.py)将扰动加到节点嵌入上。
+1. **着色分组。** 将互不相邻的节点放入同一初始组，并拆分过大的组。
+2. **受限合并。** 增加非相邻节点对的共享机会，同时限制组内边的数量和组的大小。
+3. **按组扰动。** 沿合并路径选定最终划分。同组节点共享一个高斯向量，不同组独立采样。
 
-## 仓库结构
-
-| 路径 | 用途 |
-| --- | --- |
-| [`main.py`](../main.py)、[`train.py`](../train.py) | 实验入口与训练 |
-| [`coloring/`](../coloring/)、[`model.py`](../model.py) | 构建 CHROMA 分组并对节点嵌入加噪 |
-| [`configs/`](../configs/)、[`assets/`](../assets/) | 实验配置、预计算分组和数据划分 |
-| [`scripts/`](../scripts/)、[`tests/`](../tests/) | 实验命令、输入校验和测试 |
-| [`results/`](../results/)、[`summarize.py`](../summarize.py) | 逐种子参考结果与汇总工具 |
-
-各模块及运行产物见[代码说明](code.md)。
-
-## 复现实验
+## 快速开始
 
 ### 安装依赖
 
@@ -52,7 +41,7 @@ python -m pip install torch==2.5.1 --index-url https://download.pytorch.org/whl/
 python -m pip install --only-binary=torch-scatter,torch-sparse -r requirements.txt -f https://data.pyg.org/whl/torch-2.5.1+cu124.html
 ```
 
-### 快速检查
+### CPU 试跑
 
 校验随库文件，并用 Cora 在 CPU 上训练和评估两轮：
 
@@ -60,6 +49,8 @@ python -m pip install --only-binary=torch-scatter,torch-sparse -r requirements.t
 python scripts/verify_data.py
 python main.py --dataset cora --method CHROMA --device cpu --smoke
 ```
+
+## 复现实验
 
 ### Cora
 
@@ -98,6 +89,18 @@ python summarize.py --input results/main_table_per_seed.csv --output results/ref
 
 每次训练的日志、模型和指标都保存在 `runs/`。汇总自行完成的实验时，使用
 `--input runs --output results/my_summary.csv`。主实验和对照实验的记录见[参考结果](../results/README.md)。
+
+## 仓库结构
+
+| 路径 | 用途 |
+| --- | --- |
+| [`main.py`](../main.py)、[`train.py`](../train.py) | 实验入口与训练 |
+| [`coloring/`](../coloring/)、[`model.py`](../model.py) | 构建 CHROMA 分组并对节点嵌入加噪 |
+| [`configs/`](../configs/)、[`assets/`](../assets/) | 实验配置、预计算分组和数据划分 |
+| [`scripts/`](../scripts/)、[`tests/`](../tests/) | 实验命令、输入校验和测试 |
+| [`results/`](../results/)、[`summarize.py`](../summarize.py) | 逐种子参考结果与汇总工具 |
+
+各模块及运行产物见[代码说明](code.md)。
 
 ## 引用
 

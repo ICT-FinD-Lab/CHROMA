@@ -1,33 +1,20 @@
-# CHROMA: Coloring-based Graph Reconstruction Defense with Organized Merging of Perturbation
+# CHROMA
 
-[中文说明](docs/README_CN.md)
+*Coloring-based Graph Reconstruction Defense with Organized Merging of Perturbation*
 
+[中文说明](docs/README_CN.md) · [Quick start](#quick-start) · [Experiment settings](docs/experiments.md) · [Reference results](results/README.md)
 
-This repository implements **GRASP** and its extension, **CHROMA**, for defending
-against attacks that reconstruct graph edges from the similarity of node embeddings.
+CHROMA uses graph structure to decide which nodes share a Gaussian perturbation.
+It targets attacks that infer edges from node embedding similarities. The
+repository includes the original GRASP and independent-noise baselines.
 
-GRASP combines independent and identical Gaussian noise through Bernoulli
-assignment to disrupt the relative ranking of node similarities. CHROMA uses graph
-structure to decide which nodes share a perturbation. It first colors the graph
-so that nodes of the same color are nonadjacent. It splits oversized color
-classes and merges groups subject to conflict and size limits. It selects a
-partition by comparing how often adjacent and nonadjacent pairs end up in the
-same group. Nodes in the same group receive the same Gaussian noise vector.
-Different groups draw their noise independently.
+## How it works
 
-## Repository structure
+1. **Color.** Form initial groups of nonadjacent nodes and split oversized groups.
+2. **Merge.** Increase sharing among nonadjacent pairs while limiting sharing across edges and the size of each group.
+3. **Perturb.** Select a partition along the merge path. Nodes in each group share one Gaussian vector, with independent draws across groups.
 
-| Path | Purpose |
-| --- | --- |
-| [`main.py`](main.py), [`train.py`](train.py) | Experiment launcher and training loop |
-| [`coloring/`](coloring/), [`model.py`](model.py) | Build CHROMA groups and apply noise to node embeddings |
-| [`configs/`](configs/), [`assets/`](assets/) | Experiment settings, partitions, and data splits |
-| [`scripts/`](scripts/), [`tests/`](tests/) | Experiment commands, input verification, and tests |
-| [`results/`](results/), [`summarize.py`](summarize.py) | Per-seed reference results and summary tool |
-
-See [the code guide](docs/code.md) for module details and the files produced by each run.
-
-## Reproduce the experiments
+## Quick start
 
 ### Install dependencies
 
@@ -56,7 +43,7 @@ python -m pip install torch==2.5.1 --index-url https://download.pytorch.org/whl/
 python -m pip install --only-binary=torch-scatter,torch-sparse -r requirements.txt -f https://data.pyg.org/whl/torch-2.5.1+cu124.html
 ```
 
-### Quick check
+### Run a CPU check
 
 Verify the supplied inputs and run two epochs of training and evaluation on Cora:
 
@@ -65,8 +52,9 @@ python scripts/verify_data.py
 python main.py --dataset cora --method CHROMA --device cpu --smoke
 ```
 
-### Cora
+## Reproduce the experiments
 
+### Cora
 
 ```bash
 python main.py --dataset cora --backbone gcn --method USP --sigma 1.0 --seed 0 --device 0
@@ -104,6 +92,18 @@ python summarize.py --input results/main_table_per_seed.csv --output results/ref
 Each training run writes its log, checkpoint, and metrics to `runs/`. To
 summarize your own completed runs, use `--input runs --output results/my_summary.csv`.
 See [reference results](results/README.md) for the main comparison and controls.
+
+## Repository structure
+
+| Path | Purpose |
+| --- | --- |
+| [`main.py`](main.py), [`train.py`](train.py) | Experiment launcher and training loop |
+| [`coloring/`](coloring/), [`model.py`](model.py) | Build CHROMA groups and apply noise to node embeddings |
+| [`configs/`](configs/), [`assets/`](assets/) | Experiment settings, partitions, and data splits |
+| [`scripts/`](scripts/), [`tests/`](tests/) | Experiment commands, input verification, and tests |
+| [`results/`](results/), [`summarize.py`](summarize.py) | Per-seed reference results and summary tool |
+
+See [the code guide](docs/code.md) for module details and the files produced by each run.
 
 ## Citation
 

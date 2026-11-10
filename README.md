@@ -4,15 +4,14 @@
 
 [中文说明](docs/README_CN.md) · [Quick start](#quick-start) · [Experiment settings](docs/experiments.md) · [Reference results](results/README.md)
 
-CHROMA uses graph structure to decide which nodes share a Gaussian perturbation.
-It targets attacks that infer edges from node embedding similarities. The
-repository includes the original GRASP and independent-noise baselines.
+CHROMA defends against graph reconstruction attacks that infer edges from node
+embedding similarities. The repository also includes the GRASP and
+independent-noise baselines.
 
-## How it works
-
-1. **Color.** Form initial groups of nonadjacent nodes and split oversized groups.
-2. **Merge.** Increase sharing among nonadjacent pairs while limiting sharing across edges and the size of each group.
-3. **Perturb.** Select a partition along the merge path. Nodes in each group share one Gaussian vector, with independent draws across groups.
+CHROMA starts with graph coloring to group nonadjacent nodes. It splits
+oversized groups and merges groups subject to limits on within-group edges and
+group size. In the final partition, nodes in the same group share one Gaussian
+noise vector, sampled independently for each group.
 
 ## Quick start
 

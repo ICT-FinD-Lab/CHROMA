@@ -4,9 +4,9 @@
 
 [English](../README.md) · [快速开始](#快速开始) · [实验设置](experiments.md) · [参考结果](../results/README.md)
 
-CHROMA 用于防御根据节点嵌入相似度推断图中边的攻击。仓库也提供 GRASP 和独立噪声基线。
+CHROMA 用图着色和受限合并给节点分组，让同组节点共享高斯噪声，以防御基于节点嵌入相似度的图重构攻击。
 
-CHROMA 先通过图着色将互不相邻的节点分到同组，再拆分过大的组，并在限制组内边数和组大小的条件下合并。最终，同组节点共享一个高斯噪声向量，各组独立采样。
+想先试跑，可以在 [CPU 上用 Cora 跑两轮](#cpu-试跑)。要比较 CHROMA、GRASP 和独立噪声基线，按[复现实验](#复现实验)里的命令运行。
 
 ## 快速开始
 
@@ -39,7 +39,7 @@ python -m pip install --only-binary=torch-scatter,torch-sparse -r requirements.t
 
 ### CPU 试跑
 
-校验随库文件，并用 Cora 在 CPU 上训练和评估两轮：
+先检查仓库提供的数据文件，再用 Cora 在 CPU 上训练和评估两轮。
 
 ```bash
 python scripts/verify_data.py

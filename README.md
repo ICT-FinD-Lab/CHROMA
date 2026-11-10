@@ -4,14 +4,13 @@
 
 [中文说明](docs/README_CN.md) · [Quick start](#quick-start) · [Experiment settings](docs/experiments.md) · [Reference results](results/README.md)
 
-CHROMA defends against graph reconstruction attacks that infer edges from node
-embedding similarities. The repository also includes the GRASP and
-independent-noise baselines.
+CHROMA uses graph coloring and constrained merging to decide which nodes share
+Gaussian noise when defending against graph reconstruction from node embedding
+similarities.
 
-CHROMA starts with graph coloring to group nonadjacent nodes. It splits
-oversized groups and merges groups subject to limits on within-group edges and
-group size. In the final partition, nodes in the same group share one Gaussian
-noise vector, sampled independently for each group.
+To try it, start with the [two-epoch Cora example on CPU](#run-a-cpu-check).
+The [reproduction section](#reproduce-the-experiments) shows how to run CHROMA,
+GRASP, and the independent-noise baseline.
 
 ## Quick start
 
